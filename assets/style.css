@@ -590,6 +590,7 @@ html.seen .tip { display: none; }
 .vgrid blockquote { margin: 0 0 1.1rem; font: italic 500 clamp(1.35rem, 2vw, 1.75rem)/1.25 var(--display); overflow-wrap: break-word; hyphens: auto; }
 .vgrid figcaption { display: flex; flex-direction: column; gap: 0.3rem; font: 500 0.72rem/1.4 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
 .vgrid figcaption span { color: var(--dim); letter-spacing: 0.06em; text-transform: none; font-weight: 400; font-size: 0.78rem; }
+.mani .by { display: block; margin-top: 0.9rem; font: 500 0.72rem/1.4 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
 .vnote { margin: 1.6rem 0 0; font: 400 0.76rem/1.5 var(--mono); color: var(--dim); }
 @media (max-width: 900px) { .vgrid { grid-template-columns: 1fr; gap: 1.8rem; } }
 
@@ -738,7 +739,7 @@ body { position: relative; }
 .wh { pointer-events: auto; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
 .wh.drag { cursor: grabbing; }
 .wh-x { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px var(--ink); font: 500 13px/19px var(--mono); font-style: normal; letter-spacing: 0; text-align: center; opacity: 0; transition: opacity 0.2s; }
-.wh:hover .wh-x, .wh.drag .wh-x { opacity: 1; }
+.wh:hover .wh-x, .wh.drag .wh-x, .wh.pinned .wh-x { opacity: 1; }
 @media (pointer: coarse) { .wh-x { opacity: 1; } }
 .wh-tag .wh-x { right: 26px; }
 .wh-blot .wh-x { top: 12%; right: 9%; }

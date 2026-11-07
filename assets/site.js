@@ -917,9 +917,14 @@
             }
             var active = document.querySelector('[data-level][aria-pressed="true"]');
             var symBtn = document.getElementById('symtoggle');
+            var group = document.querySelector('.seg.lv');
             var b = Math.round(bias * 100);
-            rd.textContent = (active ? active.getAttribute('data-level') + ' · ' + active.querySelector('span').textContent.trim() : '')
-                + (symOn && symBtn ? ' · ' + symBtn.textContent.trim() : '') + ' · ' + (rd.getAttribute('data-bias') || '')
+            var shown = active ? active.querySelector('span').textContent.trim() : '';
+            /* у «Символах» кнопки рівнів означають розмір знаків, і рядок стану каже саме це */
+            rd.textContent = (symOn && symBtn && group
+                ? symBtn.textContent.trim() + ' · ' + group.getAttribute('data-sym-label') + ': ' + shown
+                : (active ? active.getAttribute('data-level') + ' · ' + shown : ''))
+                + ' · ' + (rd.getAttribute('data-bias') || '')
                 + ' ' + (b > 0 ? '+' : b < 0 ? '−' : '±') + pad(Math.abs(b));
         }
 
@@ -1017,11 +1022,30 @@
                 readout();
             });
         }
+        /* У режимі «Символи» кнопки рівнів міняють розмір знаків: тому вони міняють і назви, і підпис групи */
+        function relabel() {
+            var grp = document.querySelector('.seg.lv');
+            for (var q = 0; q < levelButtons.length; q++) {
+                var span = levelButtons[q].querySelector('span');
+                if (!span) {
+                    continue;
+                }
+                if (!span.getAttribute('data-orig')) {
+                    span.setAttribute('data-orig', span.textContent);
+                }
+                span.textContent = symOn ? (levelButtons[q].getAttribute('data-sym') || span.getAttribute('data-orig')) : span.getAttribute('data-orig');
+                levelButtons[q].title = levelButtons[q].getAttribute('data-level') + ' · ' + span.textContent;
+            }
+            if (grp) {
+                grp.setAttribute('aria-label', (symOn ? grp.getAttribute('data-sym-label') : grp.getAttribute('data-label')) || '');
+            }
+        }
         var symToggle = document.getElementById('symtoggle');
         if (symToggle) {
             symToggle.addEventListener('click', function () {
                 symOn = !symOn;
                 symToggle.setAttribute('aria-pressed', String(symOn));
+                relabel();
                 dirty = true;
                 readout();
             });
@@ -1507,7 +1531,7 @@
         ['s', 'Натисніть I або слово «двох»: світло й тінь поміняються місцями.'],
         ['s', 'Рухайте курсором по демонстрації: джерело світла піде за ним.'],
         ['s', 'Повзунок «Баланс» зсуває межу між світлом і тінню. Це забавка сайту: у програмі стиль добирається сам.'],
-        ['s', 'У демонстрації «Символи» міняють щільність знаків разом із рівнем.'],
+        ['s', 'У демонстрації в режимі «Символи» кнопки рівнів міняють розмір знаків.'],
         ['s', 'Слід пера й ці тихі сюрпризи вимикаються внизу сторінки.'],
         ['s', 'Угорі шість палітр із програми: чорне й біле не мусить бути чорним і білим.'],
         ['s', 'Наведіть курсор на кнопки рівнів: кожна коротко показує свій почерк.'],
@@ -1552,7 +1576,7 @@
         ['s', 'Press I or the word “two”: light and shadow swap places.'],
         ['s', 'Move the cursor over the demo: the light source follows it.'],
         ['s', 'The “Balance” slider shifts the line between light and shadow. It is a toy of this site: the app chooses the style by itself.'],
-        ['s', 'In the demo, “Symbols” change glyph density along with the level.'],
+        ['s', 'In the demo, with “Symbols” on, the level buttons change the glyph size.'],
         ['s', 'The pen trail and these quiet surprises can be switched off at the bottom of the page.'],
         ['s', 'Six palettes from the app are at the top: black and white need not be black and white.'],
         ['s', 'Hover the level buttons: each one briefly shows its own hand.'],
@@ -1985,6 +2009,7 @@
             var gone = false;
             var dragging = false;
             var moved = false;
+            var pinned = false;
             var sx = 0;
             var sy = 0;
             var ox = 0;
@@ -2017,7 +2042,7 @@
             });
             el.addEventListener('pointerleave', function () {
                 if (!dragging) {
-                    arm(2400);
+                    arm(pinned ? 45000 : 2400);
                 }
             });
             el.addEventListener('pointerdown', function (e) {
@@ -2063,7 +2088,10 @@
                 }
                 catch (err) { /* не критично */ }
                 if (moved) {
-                    arm(4000);
+                    /* посунута підказка прикріплюється: лишається, доки її не закриють (клік, Esc) або майже хвилину */
+                    pinned = true;
+                    el.classList.add('pinned');
+                    arm(45000);
                 }
                 else {
                     close();
