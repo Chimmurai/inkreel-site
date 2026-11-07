@@ -47,8 +47,8 @@
    Палітра задає --bg і --fg (прості hex #rrggbb: їх читає assets/site.js).
    Клас .inv міняє пару місцями: «чорна смуга» на білій сторінці (і навпаки), як інь і ян. */
 :root {
-    --bg: #f1eadb;
-    --fg: #1b1a17;
+    --bg: #ffffff;
+    --fg: #000000;
     --paper: var(--bg);
     --ink: var(--fg);
     --gut: clamp(1rem, 4vw, 2rem);
@@ -69,8 +69,8 @@
 :root { --mark: color-mix(in srgb, var(--ink) 72%, var(--paper)); }
 .inv { --paper: var(--fg); --ink: var(--bg); background: var(--paper); color: var(--ink); }
 /* Палітри взято з програми (назви й кольори ті самі). --dimk: частка туші в другорядному тексті; у кольорових палітр вища, щоб контраст лишався ≥ 4,5 : 1 в обох полярностях */
+html[data-palette="classic"]   { --bg: #ffffff; --fg: #000000; }
 html[data-palette="paper"]     { --bg: #f1eadb; --fg: #1b1a17; }
-html[data-palette="sepia"]     { --bg: #e9d6af; --fg: #3a2616; --dimk: 78%; }
 html[data-palette="carmine"]   { --bg: #f7f0e4; --fg: #a3171e; --dimk: 88%; }
 html[data-palette="cyanotype"] { --bg: #f3f0e6; --fg: #16379a; --dimk: 82%; }
 html[data-palette="amber"]     { --bg: #150d00; --fg: #ffb000; color-scheme: dark; }
@@ -121,8 +121,8 @@ body::after {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .5 0 0 0 0 .5 0 0 0 0 .5 0 0 0 1.3 -.1'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     animation: grain 1.2s steps(1) infinite;
 }
-html:not([data-palette]) body::after, html[data-palette="paper"] body::after { opacity: 0.045; }
-html[data-palette="paper"][data-flip] body::after { opacity: 0.07; }
+html:not([data-palette]) body::after, html[data-palette="classic"] body::after, html[data-palette="paper"] body::after { opacity: 0.04; }
+html[data-palette="classic"][data-flip] body::after, html[data-palette="paper"][data-flip] body::after { opacity: 0.07; }
 @keyframes grain {
     0% { transform: translate(0, 0); }
     20% { transform: translate(-3%, 2%); }
@@ -149,6 +149,22 @@ html[data-palette="paper"][data-flip] body::after { opacity: 0.07; }
     clip-path: inset(0 100% 0 0); transition: clip-path 0.55s var(--ease);
 }
 .top nav a:hover::after, .top nav a:focus-visible::after { clip-path: inset(0); }
+/* Зона натискання: невидима плашка навколо малих посилань і кнопок шапки (вигляд і розкладка не змінюються) */
+.top nav a::before, .lang a::before, .pal button::before, .flipbtn::before, .lnk::before, .mini::before { content: ""; position: absolute; }
+.top nav a::before { inset: -16px -10px; }
+.lang a { position: relative; }
+.lang a::before { inset: -12px -3px; }
+.pal button, .flipbtn, .lnk, .mini { position: relative; }
+.pal button::before { inset: -12px -4px; border-radius: 0; }
+.flipbtn::before { inset: -12px; }
+.lnk::before { inset: -10px -6px; }
+.mini::before { inset: -6px; }
+@media (pointer: coarse) {
+    .lang a::before { inset: -16px -6px; }
+    .pal button::before { inset: -16px -5px; }
+    .flipbtn::before { inset: -16px; }
+    .lnk::before { inset: -14px -8px; }
+}
 /* лінія читання: тягнеться за пером і тоншає на кінці (значення --read від 0 до 1 ставить site.js) */
 .top::after {
     content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; pointer-events: none;
@@ -338,7 +354,17 @@ button.flip:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.12e
 .film::after { right: 14px; }
 .film canvas { display: block; width: 100%; height: auto; margin: 0 auto; aspect-ratio: 3 / 2; background: var(--paper); touch-action: pan-y; }
 .tc { position: absolute; left: 58px; top: 32px; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; background: var(--paper); color: var(--ink); padding: 0.3rem 0.45rem; pointer-events: none; }
-.ctl { display: flex; flex-wrap: wrap; gap: 1rem 1.6rem; align-items: center; justify-content: space-between; margin-top: 1.4rem; font: 500 0.7rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+/* Панель керування демо: рівні й «Символи» поруч ліворуч, «Баланс» праворуч, кнопки дій окремим рядком під лінією */
+.ctl { display: grid; grid-template-columns: auto auto 1fr auto; gap: 1rem 0.8rem; align-items: center; margin-top: 2rem; font: 500 0.7rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.ctl .slider { grid-column: 4; justify-self: end; }
+.ctl .ctl-act { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--line); }
+@media (max-width: 900px) {
+    .ctl { grid-template-columns: 1fr; }
+    .ctl .slider { grid-column: 1; justify-self: stretch; }
+    .ctl .slider input { flex: 1; width: auto; }
+    .ctl .seg { display: flex; width: 100%; }
+    .ctl .seg button { flex: 1; justify-content: center; }
+}
 .seg { display: inline-flex; border: 1px solid var(--ink); }
 .seg button { display: inline-flex; align-items: center; gap: 0.55rem; font: inherit; letter-spacing: inherit; text-transform: inherit; color: var(--ink); background: none; border: 0; padding: 0.7rem 1rem; cursor: pointer; transition: background-color 0.25s, color 0.25s; }
 .seg button + button { border-left: 1px solid var(--ink); }
@@ -534,6 +560,16 @@ html.seen .tip { display: none; }
 @media (max-width: 900px) { .grid { grid-template-columns: repeat(2, 1fr); } }
 @media (max-width: 560px) { .grid { grid-template-columns: 1fr; } }
 
+/* Цитати чужими словами: три колонки, на вузьких екранах одна */
+.voices { padding: clamp(3.5rem, 7vw, 6rem) 0 0; }
+.vgrid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.4rem 2.6rem; margin-top: 1.6rem; }
+.vgrid figure { margin: 0; padding-top: 1.2rem; border-top: 1px solid var(--line); min-width: 0; }
+.vgrid blockquote { margin: 0 0 1.1rem; font: italic 500 clamp(1.35rem, 2vw, 1.75rem)/1.25 var(--display); overflow-wrap: break-word; hyphens: auto; }
+.vgrid figcaption { display: flex; flex-direction: column; gap: 0.3rem; font: 500 0.72rem/1.4 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.vgrid figcaption span { color: var(--dim); letter-spacing: 0.06em; text-transform: none; font-weight: 400; font-size: 0.78rem; }
+.vnote { margin: 1.6rem 0 0; font: 400 0.76rem/1.5 var(--mono); color: var(--dim); }
+@media (max-width: 900px) { .vgrid { grid-template-columns: 1fr; gap: 1.8rem; } }
+
 /* 03 Почерки (смуга навиворіт) */
 #modes { padding: clamp(6.5rem, 14vw, 11rem) 0; }
 .modes { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 3.4rem; border-top: 1px solid var(--line); }
@@ -607,20 +643,22 @@ html.seen .tip { display: none; }
 
 /* 06 Запитання */
 .faq { margin-top: 2.6rem; border-top: 1px solid var(--line); }
-details { border-bottom: 1px solid var(--line); padding: 1.3rem 0; }
-summary { cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; font-size: clamp(1.45rem, 2.3vw, 1.85rem); line-height: 1.15; }
+details { border-bottom: 1px solid var(--line); padding: 0; }
+summary { padding: 1.35rem 0; cursor: pointer; list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; font-size: clamp(1.45rem, 2.3vw, 1.85rem); line-height: 1.15; }
 summary::-webkit-details-marker { display: none; }
 summary::after { content: ""; flex: none; width: 28px; height: 28px; background: var(--ink); -webkit-mask: url("/assets/pen/cross.svg") center / contain no-repeat; mask: url("/assets/pen/cross.svg") center / contain no-repeat; rotate: 45deg; transition: rotate 0.55s var(--ease), scale 0.3s var(--ease); }
 summary:hover::after { scale: 1.14; }
 details[open] summary::after { rotate: 0deg; }
-details p { margin: 0.9rem 0 0; max-width: 46rem; color: var(--dim); }
+details p { margin: -0.35rem 0 0; padding-bottom: 1.5rem; max-width: 46rem; color: var(--dim); }
+summary:hover { color: var(--ink); }
 
 /* Підвал (смуга навиворіт) */
 footer { position: relative; display: flow-root; margin-top: clamp(3rem, 6vw, 5rem); padding: clamp(3.5rem, 7vw, 6rem) 0 0; font: 400 0.78rem/1.8 var(--mono); letter-spacing: 0.05em; color: var(--dim); }
 footer.inv { color: var(--dim); }
 .foot { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2rem; }
 .foot h4 { font: 500 0.78rem/1.8 var(--mono); text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink); margin-bottom: 0.6rem; }
-.foot a { display: block; text-decoration: none; }
+.foot a { display: block; padding: 0.4rem 0; text-decoration: none; }
+@media (pointer: coarse) { .foot a { padding: 0.65rem 0; } }
 .foot a:hover { color: var(--ink); text-decoration: underline; }
 .ps { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.2rem 2rem; margin: 2.4rem 0 0; }
 .ps p { margin: 0; max-width: 34rem; font-size: clamp(1.4rem, 2.2vw, 1.8rem); color: var(--ink); rotate: -1deg; transform-origin: 0 50%; }

@@ -12,9 +12,9 @@
     var KEY = 'inkreel-palette';
     var FLIP_KEY = 'inkreel-flip';
     var SEEN_KEY = 'inkreel-seen';
-    var PALETTES = ['paper', 'sepia', 'carmine', 'cyanotype', 'amber', 'terminal'];
-    var THEME_COLORS = { paper: '#f1eadb', sepia: '#e9d6af', carmine: '#f7f0e4', cyanotype: '#f3f0e6', amber: '#150d00', terminal: '#06130a' };
-    var LEGACY_PALETTES = { night: 'paper', moss: 'terminal', indigo: 'cyanotype' };
+    var PALETTES = ['classic', 'paper', 'carmine', 'cyanotype', 'amber', 'terminal'];
+    var THEME_COLORS = { classic: '#ffffff', paper: '#f1eadb', carmine: '#f7f0e4', cyanotype: '#f3f0e6', amber: '#150d00', terminal: '#06130a' };
+    var LEGACY_PALETTES = { night: 'classic', sepia: 'paper', moss: 'terminal', indigo: 'cyanotype' };
     var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
     function clamp(v, lo, hi) {
@@ -36,7 +36,7 @@
             return;
         }
         var page = getComputedStyle(root).getPropertyValue('--paper').trim();
-        meta.setAttribute('content', /^#[0-9a-f]{6}$/i.test(page) ? page : THEME_COLORS[name || root.getAttribute('data-palette')] || '#f7f5ef');
+        meta.setAttribute('content', /^#[0-9a-f]{6}$/i.test(page) ? page : THEME_COLORS[name || root.getAttribute('data-palette')] || '#ffffff');
     }
 
     function setPalette(name, persist) {
@@ -44,7 +44,7 @@
             name = LEGACY_PALETTES[name];
         }
         if (PALETTES.indexOf(name) < 0) {
-            name = 'paper';
+            name = 'classic';
         }
         root.setAttribute('data-palette', name);
         var buttons = document.querySelectorAll('.pal button');
@@ -62,7 +62,7 @@
     }
 
     function initPalette() {
-        setPalette(root.getAttribute('data-palette') || 'paper', false);
+        setPalette(root.getAttribute('data-palette') || 'classic', false);
         var buttons = document.querySelectorAll('.pal button');
         for (var i = 0; i < buttons.length; i++) {
             buttons[i].addEventListener('click', function (e) {
@@ -1500,6 +1500,9 @@
         ['q', 'Чорно-біле — не бідність, а відбір.'],
         ['q', 'Між чорним і білим не порожнеча, а все решта.'],
         ['q', 'Усе зайве відпадає, лишається форма.'],
+        ['q', '«Де багато світла, там глибока тінь.» — Ґете, «Ґьоц фон Берліхінген»'],
+        ['q', '«Кольори — діяння світла, діяння й страждання.» — Ґете'],
+        ['q', '«Негатив — це як партитура композитора, а відбиток — її виконання.» — Ансел Адамс'],
         ['s', 'Киньте в демонстрацію власне фото чи відео: воно не залишає браузер.'],
         ['s', 'Натисніть I або слово «двох»: світло й тінь поміняються місцями.'],
         ['s', 'Рухайте курсором по демонстрації: джерело світла піде за ним.'],
@@ -1542,6 +1545,9 @@
         ['q', 'Black and white is not poverty, it is selection.'],
         ['q', 'Between black and white there is not emptiness, but everything else.'],
         ['q', 'Everything extra falls away; form remains.'],
+        ['q', '“Where there is much light, the shadow is deep.” — Goethe, Götz von Berlichingen'],
+        ['q', '“Colors are the deeds and sufferings of light.” — Goethe'],
+        ['q', '“The negative is the equivalent of the composer’s score, and the print is the performance.” — Ansel Adams'],
         ['s', 'Drop your own photo or video into the demo: it never leaves your browser.'],
         ['s', 'Press I or the word “two”: light and shadow swap places.'],
         ['s', 'Move the cursor over the demo: the light source follows it.'],
@@ -1852,19 +1858,45 @@
             return idx;
         }
 
-        /* скільки з дванадцяти пробних точок прямокутника лежать на тексті, кнопках, картинках чи темній смузі */
-        function blocked(x, y, w, h) {
-            var hits = 0;
-            for (var i = 0; i < 4; i++) {
-                for (var j = 0; j < 3; j++) {
-                    var els = document.elementsFromPoint(x + 4 + (w - 8) * i / 3, y + 4 + (h - 8) * j / 2);
-                    var t = els[0];
-                    if (t && t.closest && t.closest(TIP_BLOCK)) {
-                        hits++;
+        /* рамки всього, на що підказка лізти не повинна: рядки тексту (точні, а не блоки абзаців), кнопки, картинки, канви, темні смуги */
+        function blockers() {
+            var vh = window.innerHeight;
+            var out = [];
+            var els = document.querySelectorAll(TIP_BLOCK);
+            for (var i = 0; i < els.length; i++) {
+                var e = els[i];
+                if (e.closest('.whispers, .fx')) {
+                    continue;
+                }
+                var r = e.getBoundingClientRect();
+                if (!r.width || !r.height || r.bottom < 0 || r.top > vh) {
+                    continue;
+                }
+                if (/^(CANVAS|IMG|SVG|BUTTON|INPUT)$/i.test(e.tagName) || e.matches('.inv, .film, .plate, .reel, .pen, .disc, .sw')) {
+                    out.push(r);
+                    continue;
+                }
+                var range = document.createRange();
+                range.selectNodeContents(e);
+                var rs = range.getClientRects();
+                for (var k = 0; k < rs.length; k++) {
+                    if (rs[k].width > 0 && rs[k].height > 0) {
+                        out.push(rs[k]);
                     }
                 }
             }
-            return hits;
+            return out;
+        }
+
+        function free(x, y, w, h, list) {
+            var pad = 10;
+            for (var i = 0; i < list.length; i++) {
+                var r = list[i];
+                if (x < r.right + pad && x + w > r.left - pad && y < r.bottom + pad && y + h > r.top - pad) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         function place(el) {
@@ -1872,26 +1904,23 @@
             var vh = window.innerHeight;
             var w = el.offsetWidth;
             var h = el.offsetHeight;
-            var best = null;
-            var bestHits = 99;
-            for (var t = 0; t < 16; t++) {
+            if (vw < 700) {
+                /* на вузькому екрані вільних місць нема: підказка тимчасово сидить плашкою внизу по центру */
+                el.style.left = Math.max(8, (vw - w) / 2).toFixed(0) + 'px';
+                el.style.top = Math.max(70, vh - h - 18).toFixed(0) + 'px';
+                return true;
+            }
+            var list = blockers();
+            for (var t = 0; t < 40; t++) {
                 var x = rand(12, Math.max(13, vw - w - 12));
                 var y = rand(70, Math.max(71, vh - h - 14));
-                var hits = blocked(x, y, w, h);
-                if (hits < bestHits) {
-                    bestHits = hits;
-                    best = [x, y];
-                    if (!hits) {
-                        break;
-                    }
+                if (free(x, y, w, h, list)) {
+                    el.style.left = x.toFixed(0) + 'px';
+                    el.style.top = y.toFixed(0) + 'px';
+                    return true;
                 }
             }
-            if (!best || bestHits > 1) {
-                return false;
-            }
-            el.style.left = best[0].toFixed(0) + 'px';
-            el.style.top = best[1].toFixed(0) + 'px';
-            return true;
+            return false;
         }
 
         function show() {
