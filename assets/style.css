@@ -728,10 +728,21 @@ code { font: 400 0.86em var(--mono); background: var(--faint); border: 1px solid
 .js .rv { opacity: 0; transform: translateY(22px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
 .js .rv.in { opacity: 1; transform: none; }
 /* Підказки (шість виглядів) і «живі події»: нічого не ловить клацання, усе тимчасове */
-.whispers, .fx { position: fixed; inset: 0; z-index: 45; pointer-events: none; }
-.fx { z-index: 44; overflow: hidden; mix-blend-mode: difference; }
+.whispers { position: fixed; inset: 0; z-index: 45; pointer-events: none; }
+/* краплі й плями лежать на сторінці (не на екрані): шар займає всю сторінку й гортається разом із нею; змішування difference кожної краплі окремо */
+body { position: relative; }
+.fx { position: absolute; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; pointer-events: none; }
 .whispers[hidden], .fx[hidden] { display: none; }
-.fx-i { position: absolute; background: var(--fx, #fff); will-change: transform, opacity; }
+.fx-i { position: absolute; background: var(--fx, #fff); mix-blend-mode: difference; will-change: transform, opacity; }
+/* підказку можна схопити й посунути, клікнути (закрити); хрестик показується при наведенні, на дотику завжди */
+.wh { pointer-events: auto; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none; }
+.wh.drag { cursor: grabbing; }
+.wh-x { position: absolute; top: 6px; right: 6px; width: 20px; height: 20px; border-radius: 50%; background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px var(--ink); font: 500 13px/19px var(--mono); font-style: normal; letter-spacing: 0; text-align: center; opacity: 0; transition: opacity 0.2s; }
+.wh:hover .wh-x, .wh.drag .wh-x { opacity: 1; }
+@media (pointer: coarse) { .wh-x { opacity: 1; } }
+.wh-tag .wh-x { right: 26px; }
+.wh-blot .wh-x { top: 12%; right: 9%; }
+.wh-film .wh-x { top: 14px; }
 .wh { position: absolute; left: 0; top: 0; max-width: min(19rem, 78vw); color: var(--ink); line-height: 1.35;
     opacity: 0; filter: blur(7px); transform: translateY(10px) rotate(var(--r, 0deg));
     transition: opacity 0.9s var(--ease), filter 0.9s var(--ease), transform 1.2s var(--ease); }

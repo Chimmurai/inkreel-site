@@ -1621,6 +1621,7 @@
             return anim;
         }
 
+        /* усі координати подій сторінкові (не екранні): краплі лишаються на тому місці сторінки, куди впали, і їдуть разом із прокручуванням */
         function bit(x, y, w, h, radius) {
             var e = document.createElement('i');
             e.className = 'fx-i';
@@ -1736,8 +1737,22 @@
             window.setTimeout(function () {
                 h[0].classList.remove('bleed');
             }, 2300);
-            drip(h[1].left + rand(0.1, 0.8) * Math.min(h[1].width, 600), h[1].bottom - 6, rand(60, 160));
+            drip(window.pageXOffset + h[1].left + rand(0.1, 0.8) * Math.min(h[1].width, 600), window.pageYOffset + h[1].bottom - 6, rand(60, 160));
             return true;
+        }
+
+        /* краплі висять на нижньому краї видимих блоків (заголовок, картка, кадр), а не з порожнечі */
+        function visibleAnchor() {
+            var list = document.querySelectorAll('h1, h2, h3, .card, .mode, .box, .vgrid figure, .film, .notes > div, details');
+            var vh = window.innerHeight;
+            var pick = [];
+            for (var i = 0; i < list.length; i++) {
+                var r = list[i].getBoundingClientRect();
+                if (r.top > 80 && r.bottom < vh - 30 && r.width > 60) {
+                    pick.push(r);
+                }
+            }
+            return pick.length ? pick[Math.floor(Math.random() * pick.length)] : null;
         }
 
         function fire() {
@@ -1746,22 +1761,24 @@
             }
             var vw = window.innerWidth;
             var vh = window.innerHeight;
-            var top = (document.querySelector('.top') || { offsetHeight: 50 }).offsetHeight;
+            var sx = window.pageXOffset;
+            var sy = window.pageYOffset;
             var r = Math.random();
-            if (r < 0.34) {
-                drip(rand(vw * 0.05, vw * 0.95), top - 2, rand(vh * 0.3, vh * 0.8));
+            var a = visibleAnchor();
+            if (r < 0.34 && a) {
+                drip(sx + a.left + rand(0.08, 0.92) * Math.min(a.width, 720), sy + a.bottom - 3, rand(vh * 0.2, vh * 0.55));
             }
             else if (r < 0.52) {
-                splash(rand(vw * 0.08, vw * 0.92), rand(vh * 0.2, vh * 0.88), rand(1.4, 2.4));
+                splash(sx + rand(vw * 0.08, vw * 0.92), sy + rand(vh * 0.2, vh * 0.88), rand(1.4, 2.4));
             }
             else if (r < 0.7) {
-                ripple(rand(vw * 0.08, vw * 0.92), rand(vh * 0.2, vh * 0.85));
+                ripple(sx + rand(vw * 0.08, vw * 0.92), sy + rand(vh * 0.2, vh * 0.85));
             }
             else if (r < 0.86) {
-                streak(rand(vw * 0.04, vw * 0.7), rand(vh * 0.15, vh * 0.85));
+                streak(sx + rand(vw * 0.04, vw * 0.7), sy + rand(vh * 0.15, vh * 0.85));
             }
             else if (!bleed()) {
-                drip(rand(vw * 0.05, vw * 0.95), top - 2, rand(vh * 0.3, vh * 0.7));
+                splash(sx + rand(vw * 0.08, vw * 0.92), sy + rand(vh * 0.2, vh * 0.88), rand(1.2, 2));
             }
         }
 
@@ -1784,8 +1801,8 @@
                 var n = 2 + Math.floor(Math.random() * 2);
                 for (var i = 0; i < n; i++) {
                     var sz = rand(2.5, 5);
-                    var x = rect.left + rect.width * rand(0.15, 0.85);
-                    var y = rect.bottom - 2;
+                    var x = window.pageXOffset + rect.left + rect.width * rand(0.15, 0.85);
+                    var y = window.pageYOffset + rect.bottom - 2;
                     var d = rand(30, 90);
                     put(bit(x - sz / 2, y, sz, sz * 1.3, '50% 50% 50% 50% / 62% 62% 38% 38%'), [
                         { transform: 'translateY(0)', opacity: 0.9 },
@@ -1834,6 +1851,7 @@
         }
         label();
 
+        var current = null;
         var bag = [];
         var lastIdx = -1;
         function nextIndex() {
@@ -1944,6 +1962,12 @@
             var text = document.createElement('span');
             text.textContent = tip[1];
             el.appendChild(text);
+            var cross = document.createElement('i');
+            cross.className = 'wh-x';
+            cross.setAttribute('aria-hidden', 'true');
+            cross.textContent = '×';
+            el.appendChild(cross);
+            el.title = LANG === 'en' ? 'Click to close, drag to move' : 'Клік закриває, перетягніть, щоб посунути';
             layer.appendChild(el);
             if (!place(el)) {
                 el.remove();
@@ -1955,18 +1979,106 @@
                     el.classList.add('in');
                 });
             });
-            window.setTimeout(function () {
+
+            /* Підказку можна закрити (клік, Esc) і посунути (перетягнути), якщо вона щось затулила; поки на ній курсор, вона не зникає */
+            var timer = 0;
+            var gone = false;
+            var dragging = false;
+            var moved = false;
+            var sx = 0;
+            var sy = 0;
+            var ox = 0;
+            var oy = 0;
+            function close() {
+                if (gone) {
+                    return;
+                }
+                gone = true;
+                window.clearTimeout(timer);
                 var rect = el.getBoundingClientRect();
+                el.style.pointerEvents = 'none';
                 el.classList.add('out');
                 if (fxApi && (style === 'note' || style === 'blot' || style === 'tag')) {
                     fxApi.dissolve(rect);
                 }
+                current = null;
                 window.setTimeout(function () {
                     el.remove();
                 }, 1300);
-            }, 4800 + tip[1].length * 60);
+            }
+            function arm(ms) {
+                window.clearTimeout(timer);
+                timer = window.setTimeout(close, ms);
+            }
+            current = { close: close };
+            arm(4800 + tip[1].length * 60);
+            el.addEventListener('pointerenter', function () {
+                window.clearTimeout(timer);
+            });
+            el.addEventListener('pointerleave', function () {
+                if (!dragging) {
+                    arm(2400);
+                }
+            });
+            el.addEventListener('pointerdown', function (e) {
+                if (e.button) {
+                    return;
+                }
+                dragging = true;
+                moved = false;
+                sx = e.clientX;
+                sy = e.clientY;
+                ox = parseFloat(el.style.left) || 0;
+                oy = parseFloat(el.style.top) || 0;
+                try {
+                    el.setPointerCapture(e.pointerId);
+                }
+                catch (err) { /* не критично */ }
+                el.classList.add('drag');
+                window.clearTimeout(timer);
+                e.preventDefault();
+            });
+            el.addEventListener('pointermove', function (e) {
+                if (!dragging) {
+                    return;
+                }
+                var dx = e.clientX - sx;
+                var dy = e.clientY - sy;
+                if (Math.abs(dx) + Math.abs(dy) > 4) {
+                    moved = true;
+                }
+                if (moved) {
+                    el.style.left = clamp(ox + dx, 4, Math.max(5, window.innerWidth - el.offsetWidth - 4)).toFixed(0) + 'px';
+                    el.style.top = clamp(oy + dy, 4, Math.max(5, window.innerHeight - el.offsetHeight - 4)).toFixed(0) + 'px';
+                }
+            });
+            function end(e) {
+                if (!dragging) {
+                    return;
+                }
+                dragging = false;
+                el.classList.remove('drag');
+                try {
+                    el.releasePointerCapture(e.pointerId);
+                }
+                catch (err) { /* не критично */ }
+                if (moved) {
+                    arm(4000);
+                }
+                else {
+                    close();
+                }
+            }
+            el.addEventListener('pointerup', end);
+            el.addEventListener('pointercancel', end);
             return true;
         }
+
+        window.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && current) {
+                current.close();
+            }
+        });
 
         function wait(ms) {
             window.setTimeout(function () {
