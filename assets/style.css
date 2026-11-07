@@ -93,7 +93,12 @@ body {
     line-height: 1.7;
     transition: background-color 0.6s var(--ease), color 0.6s var(--ease);
     overflow-x: hidden;
+    /* футер притиснуто до низу вікна, навіть коли сторінка коротша за екран (великі монітори) */
+    min-height: 100vh; min-height: 100dvh;
+    display: flex; flex-direction: column;
 }
+body > main { flex: 1 0 auto; }
+body > footer { flex: none; }
 ::selection { background: var(--ink); color: var(--paper); }
 a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
 a:hover { text-decoration-thickness: 2px; }
@@ -195,6 +200,18 @@ html[data-palette="paper"][data-flip] body::after { opacity: 0.07; }
 .btn:hover .ar, a:hover > .ar { transform: translateX(4px); }
 .btn:hover .ar.l, a:hover > .ar.l { transform: translateX(-4px); }
 .actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-top: 2.2rem; }
+/* Чорнильні краплі: на наведення з-під головної кнопки стікають краплі (маска drops.svg, колір бере з --ink) */
+.btn { position: relative; }
+.btn::after {
+    content: ""; position: absolute; left: 16%; top: calc(100% - 1px); width: 40px; aspect-ratio: 72 / 48; pointer-events: none;
+    background: var(--ink); -webkit-mask: url("/assets/pen/drops.svg") center / 100% 100% no-repeat; mask: url("/assets/pen/drops.svg") center / 100% 100% no-repeat;
+    opacity: 0; transform: translateY(-10px) scale(0.5); transform-origin: 50% 0; filter: blur(4px);
+    transition: opacity 0.4s var(--ease), transform 0.7s var(--ease), filter 0.5s var(--ease);
+}
+@media (hover: hover) {
+    .btn:is(:hover, :focus-visible)::after { opacity: 1; transform: none; filter: none; }
+}
+.ctl .btn::after { display: none; }
 
 /* Загальне */
 .wrap { position: relative; max-width: var(--wrap); margin: 0 auto; padding: 0 var(--gut); }
@@ -324,10 +341,45 @@ button.flip:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.12e
 .seg button + button { border-left: 1px solid var(--ink); }
 .seg button[aria-pressed="true"] { background: var(--ink); color: var(--paper); }
 .seg i { flex: none; display: block; width: 0.95rem; height: 0.95rem; border-radius: 50%; border: 1px solid currentColor; }
-.seg [data-mode="bin"] i { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
-.seg [data-mode="dot"] i { background: radial-gradient(circle, currentColor 0.9px, transparent 1.3px) 0 0 / 4px 4px; }
+@property --cut { syntax: "<percentage>"; inherits: false; initial-value: 50%; }
+@property --dr { syntax: "<length>"; inherits: false; initial-value: 0.9px; }
+.seg [data-mode="bin"] i { background: linear-gradient(90deg, currentColor var(--cut), transparent var(--cut)); }
+.seg [data-mode="dot"] i { background: radial-gradient(circle, currentColor var(--dr), transparent calc(var(--dr) + 0.4px)) 0 0 / 4px 4px; }
 .seg [data-mode="ink"] i { background: repeating-linear-gradient(45deg, currentColor 0 1px, transparent 1px 3px); }
 .seg [data-mode="sym"] i { border-radius: 2px; background: linear-gradient(currentColor, currentColor) 50% 35% / 60% 1px no-repeat, linear-gradient(currentColor, currentColor) 50% 65% / 40% 1px no-repeat; }
+/* Ховер режимів: кнопка на мить показує, що робить режим. Поріг: межа чорного й білого їздить туди-сюди.
+   Растр: крапки наливаються, як півтон темнішає. Штрихи: перо штрихує зліва направо. Символи: літери біжать рядком. */
+.seg button { position: relative; isolation: isolate; overflow: hidden; --o: 0.3; }
+.seg button::before { content: ""; position: absolute; inset: 0; z-index: -1; opacity: 0; pointer-events: none; transition: opacity 0.35s var(--ease), clip-path 0.7s var(--ease); }
+.seg [data-mode="bin"] { --o: 0.22; }
+.seg [data-mode="bin"]::before { background: linear-gradient(90deg, currentColor var(--cut), transparent var(--cut)); }
+.seg [data-mode="dot"]::before { background: radial-gradient(circle, currentColor var(--dr), transparent calc(var(--dr) + 0.5px)) 0 0 / 6px 6px; }
+.seg [data-mode="ink"]::before { background: repeating-linear-gradient(115deg, currentColor 0 1px, transparent 1px 6px); clip-path: inset(0 100% 0 0); }
+.seg [data-mode="sym"] { --o: 0.34; }
+.seg [data-mode="sym"]::before {
+    inset: 0 auto 0 0; width: max-content; display: flex; align-items: center; white-space: pre;
+    content: "01 # % & @ + : / \\ = * ;   01 # % & @ + : / \\ = * ;   01 # % & @ + : / \\ = * ;   01 # % & @ + : / \\ = * ;   ";
+    font: 500 0.62rem/1 var(--mono); letter-spacing: 0.34em;
+}
+@keyframes m-cut { from { --cut: 16%; } to { --cut: 84%; } }
+@keyframes m-swell { from { --dr: 0.2px; } to { --dr: 2.1px; } }
+@keyframes m-hatch { to { background-position: 4.24px 0; } }
+@keyframes m-run { to { transform: translateX(-50%); } }
+@keyframes m-glyph {
+    0% { background-size: 60% 1px, 40% 1px; }
+    34% { background-size: 36% 1px, 78% 1px; }
+    67% { background-size: 82% 1px, 28% 1px; }
+    100% { background-size: 60% 1px, 40% 1px; }
+}
+@media (hover: hover) {
+    .seg button:is(:hover, :focus-visible)::before { opacity: var(--o); }
+    .seg [data-mode="bin"]:is(:hover, :focus-visible)::before, .seg [data-mode="bin"]:is(:hover, :focus-visible) i { animation: m-cut 2.2s var(--ease) infinite alternate; }
+    .seg [data-mode="dot"]:is(:hover, :focus-visible)::before, .seg [data-mode="dot"]:is(:hover, :focus-visible) i { animation: m-swell 1.8s var(--ease) infinite alternate; }
+    .seg [data-mode="ink"]:is(:hover, :focus-visible)::before { clip-path: inset(0); animation: m-hatch 1.4s linear infinite; }
+    .seg [data-mode="ink"]:is(:hover, :focus-visible) i { animation: m-hatch 1.1s linear infinite; }
+    .seg [data-mode="sym"]:is(:hover, :focus-visible)::before { animation: m-run 5s steps(24) infinite; }
+    .seg [data-mode="sym"]:is(:hover, :focus-visible) i { animation: m-glyph 0.9s steps(1) infinite; }
+}
 .slider { display: inline-flex; align-items: center; gap: 0.7rem; }
 .slider input { width: 9rem; accent-color: var(--ink); }
 .ctl .btn { padding: 0.7rem 1rem; font-size: 0.7rem; }
@@ -548,7 +600,7 @@ details[open] summary::after { rotate: 0deg; }
 details p { margin: 0.9rem 0 0; max-width: 46rem; color: var(--dim); }
 
 /* Підвал (смуга навиворіт) */
-footer { position: relative; margin-top: clamp(3rem, 6vw, 5rem); padding: clamp(3.5rem, 7vw, 6rem) 0 0; font: 400 0.78rem/1.8 var(--mono); letter-spacing: 0.05em; color: var(--dim); }
+footer { position: relative; display: flow-root; margin-top: clamp(3rem, 6vw, 5rem); padding: clamp(3.5rem, 7vw, 6rem) 0 0; font: 400 0.78rem/1.8 var(--mono); letter-spacing: 0.05em; color: var(--dim); }
 footer.inv { color: var(--dim); }
 .foot { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 2rem; }
 .foot h4 { font: 500 0.78rem/1.8 var(--mono); text-transform: uppercase; letter-spacing: 0.14em; color: var(--ink); margin-bottom: 0.6rem; }
@@ -598,6 +650,9 @@ code { font: 400 0.86em var(--mono); background: var(--faint); border: 1px solid
 /* Поява при прокручуванні (лише з JS): повільно, без поспіху */
 .js .rv { opacity: 0; transform: translateY(22px); transition: opacity 1.1s var(--ease), transform 1.1s var(--ease); }
 .js .rv.in { opacity: 1; transform: none; }
+/* Заголовки секцій проступають, як чорнило крізь папір: з розмиття до різкості */
+.js .rv h2 { filter: blur(9px); transition: filter 1.5s var(--ease) 0.2s; }
+.js .rv.in h2 { filter: blur(0); }
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
@@ -608,6 +663,8 @@ code { font: 400 0.86em var(--mono); background: var(--faint); border: 1px solid
     .btn, button.flip, .flipbtn, summary::after { transition: none; }
     .scan i { animation: none; display: none; }
     .reel-track { animation: none; }
+    .js .rv h2 { filter: none; transition: none; }
+    .seg button::before, .seg i, .btn::after { animation: none !important; transition: none; }
 }
 @media print {
     body::after, .top, .film::before, .film::after, .wavy::before, .wavy::after, .reel, .scan, .trail, .ps-act, .glow, .tip { display: none; }

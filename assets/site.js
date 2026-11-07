@@ -1309,11 +1309,6 @@
             if (!on || e.pointerType === 'touch') {
                 return;
             }
-            var t = e.target;
-            if (t && t.closest && t.closest('canvas')) {
-                last = null;
-                return;
-            }
             var x = e.clientX;
             var y = e.clientY;
             var start = true;
@@ -1383,20 +1378,31 @@
         var top = document.querySelector('.top');
         var scrub = document.querySelectorAll('[data-scrub]');
         var track = document.querySelector('.reel-track');
-        var anim = null;
+        var reelBox = document.querySelector('.reel');
+        var driven = false;
+        var half = 0;
+        var pos = 0;
+        var prevT = 0;
+        var reelOn = true;
         var rate = 1;
         var vel = 0;
         var lastY = window.pageYOffset;
         var lastT = performance.now();
         var queued = false;
 
-        if (track && track.getAnimations && !reduced) {
-            var list = track.getAnimations();
-            anim = list.length ? list[0] : null;
-            if (anim) {
-                /* зсув на ціле число циклів: картинка та сама, але назад можна «перемотувати» без межі */
-                anim.currentTime = (anim.currentTime || 0) + 110000 * 40;
+        /* Плівка їде від коду, а не від CSS-анімації: змінювати playbackRate щокадру смикало її й губило кадри при прокручуванні вгору */
+        if (track && !reduced) {
+            driven = true;
+            track.style.animation = 'none';
+            track.style.willChange = 'transform';
+            if (reelBox && window.IntersectionObserver) {
+                new IntersectionObserver(function (entries) {
+                    reelOn = entries[entries.length - 1].isIntersecting;
+                }).observe(reelBox);
             }
+            onResize(function () {
+                half = 0;
+            });
         }
 
         function update() {
@@ -1427,15 +1433,22 @@
         onResize(update);
         update();
 
-        if (anim) {
-            tickers.push(function () {
-                vel *= 0.9;
-                var goal = 1 + clamp(vel * 4, -6, 16);
-                var next = rate + (goal - rate) * 0.12;
-                if (Math.abs(next - rate) > 0.004) {
-                    rate = next;
-                    anim.playbackRate = rate;
+        if (driven) {
+            tickers.push(function (now) {
+                var dt = prevT ? Math.min(0.2, (now - prevT) / 1000) : 0;
+                prevT = now;
+                vel *= Math.pow(0.9, dt * 60);
+                var goal = 1 + clamp(vel * 4, -5, 16);
+                rate += (goal - rate) * (1 - Math.exp(-dt * 7));
+                if (!half) {
+                    half = track.scrollWidth / 2;
                 }
+                if (!half || !reelOn) {
+                    return;
+                }
+                /* повний цикл (половина доріжки) за 110 с, як було в CSS; працює в обидва боки без межі */
+                pos = (((pos + (half / 110) * rate * dt) % half) + half) % half;
+                track.style.transform = 'translate3d(' + (-pos).toFixed(1) + 'px,0,0)';
             });
         }
     }
