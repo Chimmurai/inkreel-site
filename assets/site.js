@@ -1564,7 +1564,7 @@
         ['p', 'The F key or a double click is “cinema” mode: only the frame, full screen.'],
         ['p', 'In the app the mouse wheel zooms in whole steps up to 6400%: a pixel always stays a square.'],
         ['p', 'The app has twenty palettes: from “Ink & paper” to “Retro LCD”.'],
-        ['p', '“Bake it all”: compute once, then play, zoom and export without recomputing.'],
+        ['p', '“Render all”: compute once, then play, zoom and export without recomputing.'],
         ['p', 'Size “Auto”: the app measures your PC and picks the largest size that runs in real time.'],
         ['p', 'On a weak PC the app computes every Nth frame, while time and sound stay in place.'],
         ['p', 'Video export takes the sound from the original.'],
