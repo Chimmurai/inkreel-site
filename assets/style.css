@@ -355,6 +355,13 @@ button.flip:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.12e
 .film canvas { display: block; width: 100%; height: auto; margin: 0 auto; aspect-ratio: 3 / 2; background: var(--paper); touch-action: pan-y; }
 .tc { position: absolute; left: 58px; top: 32px; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; background: var(--paper); color: var(--ink); padding: 0.3rem 0.45rem; pointer-events: none; }
 /* Панель керування демо: рівні й «Символи» поруч ліворуч, «Баланс» праворуч, кнопки дій окремим рядком під лінією */
+/* «Прев'ю» на кадрі й рядок «У програмі ще»: тихі натяки, що це лише зразок. Значки пунктирні, як ще не відкриті. */
+.pv { position: absolute; right: 58px; top: 32px; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; background: var(--paper); color: var(--ink); padding: 0.3rem 0.45rem; pointer-events: none; }
+.more { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin: 1.5rem 0 0; font: 500 0.66rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.more span { margin-right: 0.5rem; }
+.more b { font-weight: 500; padding: 0.55rem 0.7rem; border: 1px dashed var(--line); cursor: default; transition: border-color 0.25s, color 0.25s; }
+.more b:hover { border-color: var(--ink); color: var(--ink); }
+.more .lnk { margin-left: auto; color: var(--ink); }
 .ctl { display: grid; grid-template-columns: auto auto 1fr auto; gap: 1rem 0.8rem; align-items: center; margin-top: 2rem; font: 500 0.7rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
 .ctl .slider { grid-column: 4; justify-self: end; }
 .ctl .ctl-act { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--line); }
@@ -473,6 +480,8 @@ button.flip:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.12e
     .film::before { left: 6px; width: 14px; }
     .film::after { right: 6px; width: 14px; }
     .tc { left: 38px; top: 22px; }
+    .pv { right: 38px; top: 22px; }
+    .more .lnk { margin-left: 0; }
 }
 
 /* Завиток під головним заголовком і рукописні підказки */

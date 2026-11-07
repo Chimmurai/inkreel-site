@@ -1512,7 +1512,6 @@
        в шести виглядах. Події: краплі чорнила, плями, кола на воді, мазки пера. Усе тимчасове, не ловить клацання, не лізе на текст.
        Вимикається кнопкою «Сюрпризи» внизу сторінки; з prefers-reduced-motion події не показуються. */
     var TIPS_UK = [
-        ['q', 'Чорне — не відсутність світла. Це рішення.'],
         ['q', 'Розфокусуйся на мить: між чорним і білим відкриються незліченні відтінки.'],
         ['q', 'Око ловить лише різницю: тут світліше, там темніше.'],
         ['q', 'Без тіні немає форми, без світла немає тіні.'],
@@ -1557,7 +1556,6 @@
         ['p', 'Той самий кадр дає те саме чорнило: дрібниці не «пливуть» від запуску до запуску.']
     ];
     var TIPS_EN = [
-        ['q', 'Black is not the absence of light. It is a decision.'],
         ['q', 'Unfocus for a moment: between black and white, countless shades open up.'],
         ['q', 'The eye catches only difference: lighter here, darker there.'],
         ['q', 'Without shadow there is no form, without light there is no shadow.'],
