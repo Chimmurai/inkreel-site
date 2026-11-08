@@ -697,7 +697,9 @@
         var modes = ['bin', 'edge', 'dot', 'mix', 'ink', 'sym'];
         var N = 12;
         var FIG = 196;                       /* ширина кадру разом з проміжком, px (див. .reel figure у style.css) */
-        var canvases = [];
+        var canvases = [];                   /* кадри малюються в канвах поза сторінкою, на сторінці лежать <img>: див. нижче */
+        var imgs = [];
+        var urls = [];
         var sets = 0;
 
         /* Доріжка складається з однакових наборів кадрів; їде вона на ширину одного набору, тож цикл безшовний.
@@ -709,9 +711,14 @@
         function addSet() {
             for (var k = 0; k < N; k++) {
                 var fig = document.createElement('figure');
-                var cv = document.createElement('canvas');
-                cv.width = 364;
-                cv.height = 248;
+                /* Кадр на сторінці це картинка, а не <canvas>: кожна живa канва є окремим шаром, і коли доріжка їде,
+                   видеокарта пересемплює кожну з них окремо, а крапки растру миготять, зникають і з'являються.
+                   Картинки малюються разом із доріжкою як один шар і їдуть жорстко. */
+                var im = document.createElement('img');
+                im.width = 364;
+                im.height = 248;
+                im.alt = '';
+                im.decoding = 'sync';
                 var cap = document.createElement('figcaption');
                 var a = document.createElement('span');
                 var b = document.createElement('span');
@@ -719,10 +726,16 @@
                 b.textContent = labels[k % modes.length] || '';
                 cap.appendChild(a);
                 cap.appendChild(b);
-                fig.appendChild(cv);
+                fig.appendChild(im);
                 fig.appendChild(cap);
                 track.appendChild(fig);
-                canvases.push(cv);
+                imgs.push(im);
+                if (sets === 0) {
+                    var cv = document.createElement('canvas');
+                    cv.width = 364;
+                    cv.height = 248;
+                    canvases.push(cv);
+                }
             }
             sets++;
         }
@@ -739,10 +752,11 @@
         grow();
         var scene = new Scene(91, 62, DEMO_CFG);
 
+        /* усі набори показують ті самі дванадцять кадрів: картинка кожного кадру одна, лише посилання на неї повторюється */
         function copies() {
-            for (var s = 1; s < sets; s++) {
-                for (var n = 0; n < N; n++) {
-                    canvases[s * N + n].getContext('2d').drawImage(canvases[n], 0, 0);
+            for (var i = 0; i < imgs.length; i++) {
+                if (urls[i % N] && imgs[i].getAttribute('src') !== urls[i % N]) {
+                    imgs[i].src = urls[i % N];
                 }
             }
         }
@@ -752,6 +766,7 @@
             for (var n = 0; n < N; n++) {
                 scene.render(0.1 + 0.8 * (n / (N - 1)), 0.26 + 0.12 * Math.sin(n * 1.3));
                 scene.paint(canvases[n].getContext('2d'), 364, 248, modes[n % modes.length], 0, colors, 26);
+                urls[n] = canvases[n].toDataURL('image/png');
             }
             copies();
         }
@@ -2189,7 +2204,9 @@
                 }
                 /* один набір кадрів = один цикл; швидкість стала в пікселях (≈16 px/с), працює в обидва боки без межі */
                 pos = (((pos + 16 * rate * dt) % half) + half) % half;
-                track.style.transform = 'translate3d(' + (-pos).toFixed(1) + 'px,0,0)';
+                /* зсув лише на ціле число фізичних пікселів: при дробовому крапки растру пересемплюються й миготять */
+                var dpr = window.devicePixelRatio || 1;
+                track.style.transform = 'translate3d(' + (-Math.round(pos * dpr) / dpr).toFixed(4) + 'px,0,0)';
             });
         }
     }

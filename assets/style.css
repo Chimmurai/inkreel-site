@@ -336,7 +336,7 @@ button.flip:focus-visible { outline: 2px solid var(--ink); outline-offset: 0.12e
 .reel-track::before { top: 11px; }
 .reel-track::after { bottom: 8px; }
 .reel figure { flex: none; width: 182px; margin: 0 14px 0 0; }
-.reel canvas { display: block; width: 182px; height: 124px; background: var(--paper); }
+.reel canvas, .reel img { display: block; width: 182px; height: 124px; background: var(--paper); }
 .reel figcaption { display: flex; justify-content: space-between; margin-top: 0.55rem; font: 500 0.58rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--dim); }
 @keyframes reel { to { transform: translateX(-50%); } }
 
