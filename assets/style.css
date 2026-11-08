@@ -71,7 +71,7 @@
 /* Палітри взято з програми (назви й кольори ті самі). --dimk: частка туші в другорядному тексті; у кольорових палітр вища, щоб контраст лишався ≥ 4,5 : 1 в обох полярностях */
 html[data-palette="classic"]   { --bg: #ffffff; --fg: #000000; }
 html[data-palette="paper"]     { --bg: #f1eadb; --fg: #1b1a17; }
-html[data-palette="carmine"]   { --bg: #f7f0e4; --fg: #a3171e; --dimk: 88%; }
+html[data-palette="poster"]    { --bg: #f0483a; --fg: #101010; --dimk: 94%; }
 html[data-palette="cyanotype"] { --bg: #f3f0e6; --fg: #16379a; --dimk: 82%; }
 html[data-palette="amber"]     { --bg: #150d00; --fg: #ffb000; color-scheme: dark; }
 html[data-palette="terminal"]  { --bg: #06130a; --fg: #7cff9b; color-scheme: dark; }

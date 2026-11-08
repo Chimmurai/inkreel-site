@@ -12,9 +12,9 @@
     var KEY = 'inkreel-palette';
     var FLIP_KEY = 'inkreel-flip';
     var SEEN_KEY = 'inkreel-seen';
-    var PALETTES = ['classic', 'paper', 'carmine', 'cyanotype', 'amber', 'terminal'];
-    var THEME_COLORS = { classic: '#ffffff', paper: '#f1eadb', carmine: '#f7f0e4', cyanotype: '#f3f0e6', amber: '#150d00', terminal: '#06130a' };
-    var LEGACY_PALETTES = { night: 'classic', sepia: 'paper', moss: 'terminal', indigo: 'cyanotype' };
+    var PALETTES = ['classic', 'paper', 'poster', 'cyanotype', 'amber', 'terminal'];
+    var THEME_COLORS = { classic: '#ffffff', paper: '#f1eadb', poster: '#f0483a', cyanotype: '#f3f0e6', amber: '#150d00', terminal: '#06130a' };
+    var LEGACY_PALETTES = { carmine: 'poster', night: 'classic', sepia: 'paper', moss: 'terminal', indigo: 'cyanotype' };
     var reduced = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
     function clamp(v, lo, hi) {
