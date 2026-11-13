@@ -1,0 +1,14 @@
+# InkReel
+
+> InkReel is a free Windows 10/11 (64-bit) app that turns video, photos and GIFs into pure black and white: every pixel is ink or paper, with dots, strokes and grain chosen by what is in the frame. / Безкоштовна програма для Windows, що перетворює відео, фото й GIF на чорно-біле.
+
+- Five quality levels: Sketch, Outline, Halftone, Drawing, Engraving; "Symbols" mode (a picture made of letters); IRNM1, our own neural network.
+- Export to MP4 (with sound) and GIF; the .ikr format renders once and exports without recomputing; 20 two-colour palettes.
+- Free, no ads. Interface in Ukrainian and English. Apache-2.0 for the app's own code.
+
+## Pages
+- [Home (Ukrainian)](https://inkreel.raimex.space/): product overview, live preview, FAQ
+- [Home (English)](https://inkreel.raimex.space/en/): the same in English
+- [Privacy policy](https://inkreel.raimex.space/en/privacy/): what the app does with data
+- [Download](https://github.com/Chimmurai/inkreel/releases/latest): installer for Windows
+- [Source code](https://github.com/Chimmurai/inkreel): GitHub repository
