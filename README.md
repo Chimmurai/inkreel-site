@@ -5,6 +5,7 @@ Static, no build step and no dependencies, served by GitHub Pages. Languages: Uk
 
 - Live site: https://inkreel.raimex.space
 - Privacy policy: https://inkreel.raimex.space/privacy/
+- App: [Microsoft Store](https://apps.microsoft.com/detail/9NW62SPG91ZR), [source code and releases](https://github.com/Chimmurai/inkreel)
 - Contact: raimex.crucible@gmail.com
 
 ## Run locally
