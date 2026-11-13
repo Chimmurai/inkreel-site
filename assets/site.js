@@ -2333,10 +2333,41 @@
         greet();
     }
 
+    /* Завантаження: перемикач «Стабільна / Бета» в коробці інсталятора (обидві версії лежать у розмітці, без JS видно обидві) */
+    function initChannel() {
+        var seg = document.querySelector('.seg.ch');
+        if (!seg) {
+            return;
+        }
+        var btns = seg.querySelectorAll('[data-chan]');
+        var panes = document.querySelectorAll('.chan');
+        function set(name) {
+            for (var i = 0; i < btns.length; i++) {
+                btns[i].setAttribute('aria-pressed', String(btns[i].getAttribute('data-chan') === name));
+            }
+            for (var j = 0; j < panes.length; j++) {
+                var on = panes[j].getAttribute('data-chan') === name;
+                panes[j].classList.toggle('off', !on);
+                panes[j].setAttribute('aria-hidden', String(!on));
+                if ('inert' in panes[j]) {
+                    panes[j].inert = !on;
+                }
+            }
+        }
+        for (var k = 0; k < btns.length; k++) {
+            btns[k].addEventListener('click', function (e) {
+                set(e.currentTarget.getAttribute('data-chan'));
+            });
+        }
+        seg.hidden = false;
+        set(window.location.hash === '#beta' ? 'beta' : 'stable');
+    }
+
     function start() {
         initPalette();
         initFlip();
         initReveal();
+        initChannel();
         initHalftones();
         initReel();
         initPlate();
