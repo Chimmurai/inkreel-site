@@ -2356,11 +2356,14 @@
         }
         for (var k = 0; k < btns.length; k++) {
             btns[k].addEventListener('click', function (e) {
+                if (e.currentTarget.disabled) {
+                    return;
+                }
                 set(e.currentTarget.getAttribute('data-chan'));
             });
         }
         seg.hidden = false;
-        set(window.location.hash === '#beta' ? 'beta' : 'stable');
+        set('stable');                                    // бета зараз вимкнена (кнопка disabled): повернути #beta можна, зняв disabled і hidden
     }
 
     function start() {
