@@ -9,6 +9,8 @@
 ## Pages
 - [Home (Ukrainian)](https://inkreel.raimex.space/): product overview, live preview, FAQ
 - [Home (English)](https://inkreel.raimex.space/en/): the same in English
+- [Gallery (Ukrainian)](https://inkreel.raimex.space/gallery/): animals, landscapes and silhouettes as 1-bit pixel art and text-symbol pictures
+- [Gallery (English)](https://inkreel.raimex.space/en/gallery/): the same in English
 - [Privacy policy](https://inkreel.raimex.space/en/privacy/): what the app does with data
 - [Download](https://github.com/Chimmurai/inkreel/releases/latest): installer for Windows
 - [Source code](https://github.com/Chimmurai/inkreel): GitHub repository
