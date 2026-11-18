@@ -184,7 +184,7 @@
       if (e.pointerType !== 'mouse' || drag || el.classList.contains('err')) { return; }
       var p = pos(e), dl = p[0], dr = W - p[0], dt = p[1], db = H - p[1], mn = Math.min(dl, dr, dt, db);
       inside = true; mouse = true; touched = true; ambient = false; clearTimeout(ambT); if (HOT.indexOf(el) < 0) { HOT.push(el); } sx = lx = p[0]; sy = ly = p[1];
-      if (active && !done) { follow(p); return; }
+      if (active && !done) { qf = pv; commit = false; ambient = false; clearTimeout(ambT); ang0 = ang; angT = ang; locked = true; follow(p); return; }
       begin(mn === dl ? 1 : mn === dr ? -1 : 0, mn === dt ? 1 : mn === db ? -1 : 0, !sym);
     });
     el._leave = function () {
