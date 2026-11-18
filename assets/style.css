@@ -821,3 +821,28 @@ body { position: relative; }
 @media print {
     body::after, .top, .film::before, .film::after, .wavy::before, .wavy::after, .reel, .scan, .trail, .whispers, .fx, .ps-act, .glow, .tip { display: none; }
 }
+
+/* === gallery === */
+.gal-wrap { max-width: var(--wrap); margin: 0 auto; padding: clamp(3rem, 8vw, 6rem) var(--gut) 5rem; }
+.gal-wrap h1 { font-size: clamp(2.6rem, 7vw, 5rem); line-height: 0.96; letter-spacing: -0.02em; margin: 0.34em 0 0.4em; }
+.gal-wrap > .pen { margin: 0.2rem 0 0.8rem -2px; }
+.gal-wrap .big { margin: 1.6rem 0 2.4rem; max-width: 46rem; padding-left: 1.3rem; border-left: 1px solid var(--ink); font: 500 clamp(1.3rem, 2.4vw, 1.7rem)/1.34 var(--display); }
+.gal { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr)); gap: 2.6rem 1.8rem; margin: 2.4rem 0 2rem; align-items: start; }
+.gcard { margin: 0; }
+.gcard .pair { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
+.gcard .pair.land { grid-template-columns: 1fr; }
+.gcard .im { position: relative; background: var(--faint); }
+.gcard .im img { display: block; width: 100%; height: auto; aspect-ratio: var(--ar); object-fit: cover; }
+.gcard .im img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+.gcard .lb { position: absolute; left: 0; bottom: 0; padding: 0.2rem 0.5rem; font: 500 0.62rem/1.4 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; background: var(--paper); color: var(--ink); }
+.gcard figcaption { padding: 0.7rem 0 0; }
+.gcard .gt { font-size: 1.35rem; line-height: 1.15; margin: 0; }
+.gcard .gm { margin: 0.2rem 0 0; font: 500 0.7rem/1.5 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+.gnote { max-width: 46rem; color: var(--dim); font-size: 0.95rem; }
+.gal-wrap .actions { margin-top: 2rem; }
+.gtease { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin: 2rem 0 1.6rem; align-items: start; }
+.gtease a { display: block; background: var(--faint); }
+.gtease img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; }
+.gtease img.px { image-rendering: pixelated; image-rendering: crisp-edges; }
+.gmore { margin: 0; }
+@media (max-width: 720px) { .gtease { grid-template-columns: repeat(2, 1fr); } }
