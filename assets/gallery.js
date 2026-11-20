@@ -187,6 +187,7 @@
       if (active && !done) { qf = pv; commit = false; ambient = false; clearTimeout(ambT); ang0 = ang; angT = ang; locked = true; follow(p); return; }
       begin(mn === dl ? 1 : mn === dr ? -1 : 0, mn === dt ? 1 : mn === db ? -1 : 0, !sym);
     });
+    el._sym = function () { return sym; };
     el._leave = function () {
       if (!inside) { return; }
       inside = false; if (active && !drag) { settle(); }
@@ -220,13 +221,14 @@
       if (!drag) { return; }
       drag = false;
       var p = pos(e);
-      if (moved < 5) { flip(p[0] < W / 2 ? 1 : -1, 0); }
+      if (moved < 5) { if (active) { settle(); } openBox(el, e.clientX, e.clientY); }
       else if (active) { settle(); }
     });
     el.addEventListener('pointercancel', function () { drag = false; if (active) { settle(); } });
     el.addEventListener('keydown', function (e) {
       var h = true;
-      if (e.key === 'ArrowRight' || e.key === 'Enter' || e.key === ' ') { flip(1, 0); }
+      if (e.key === 'Enter' || e.key === ' ') { var r0 = el.getBoundingClientRect(); openBox(el, r0.left + r0.width / 2, r0.top + r0.height / 2); }
+      else if (e.key === 'ArrowRight') { flip(1, 0); }
       else if (e.key === 'ArrowLeft') { flip(-1, 0); }
       else if (e.key === 'ArrowDown') { flip(0, 1); }
       else if (e.key === 'ArrowUp') { flip(0, -1); }
@@ -240,6 +242,136 @@
       if (!full) { ambT = setTimeout(function () { if (ambient && !inside && !drag) { pt = 0; go(); } }, 1400 + Math.random() * 1600); }
       return true;
     };
+  }
+
+  /* ---- Лайтбокс: кадр ближче. Відкривається чорнильною плямою від місця кліку й «проявляється», як фото у ванночці ---- */
+  var LB = null, LBT = null;
+  function lbTexts() { if (LBT) { return LBT; } try { LBT = JSON.parse(document.getElementById('lbtxt').textContent); } catch (e) { LBT = {}; } return LBT; }
+  function blob(cx, cy, R, seed) {
+    var pts = [], n = 44, i, a, r;
+    for (i = 0; i < n; i++) { a = i / n * 6.2832; r = R * (1 + 0.09 * Math.sin(a * 3 + seed) + 0.05 * Math.sin(a * 7 + seed * 1.7)); pts.push((cx + Math.cos(a) * r).toFixed(1) + 'px ' + (cy + Math.sin(a) * r).toFixed(1) + 'px'); }
+    return 'polygon(' + pts.join(',') + ')';
+  }
+  function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+  function spread(el, cx, cy, R, from, to, dur, seed, done) {
+    if (RM || dur <= 0) { el.style.clipPath = to >= 1 ? 'none' : blob(cx, cy, 0.5, seed); if (done) { done(); } return; }
+    var t0 = performance.now();
+    (function step(ts) {
+      var k = Math.min(1, (ts - t0) / dur), v = from + (to - from) * easeOut(k);
+      el.style.clipPath = blob(cx, cy, R * Math.max(v, 0.0001), seed);
+      if (k < 1) { requestAnimationFrame(step); } else { el.style.clipPath = to >= 1 ? 'none' : blob(cx, cy, 0.5, seed); if (done) { done(); } }
+    })(t0);
+  }
+  function infoOf(card) {
+    var fig = card.closest('figure'), h = fig && fig.querySelector('figcaption h3'), a = card.querySelector('img.a'), b = card.querySelector('img.b');
+    return { title: h ? h.textContent : '', a: (a.getAttribute('src') || '').split('?')[0], b: (b.getAttribute('src') || '').split('?')[0], altA: a.alt, altB: b.alt,
+      lw: +card.getAttribute('data-lw') || a.naturalWidth, lh: +card.getAttribute('data-lh') || a.naturalHeight, sc: card.getAttribute('data-sc'), sr: card.getAttribute('data-sr') };
+  }
+  function pad3(n) { return ('00' + n).slice(-3); }
+
+  function openBox(card, x, y) {
+    if (LB) { return; }
+    var T = lbTexts(), list = [].slice.call(document.querySelectorAll('.split:not(.err)')), cur = list.indexOf(card);
+    if (cur < 0) { return; }
+    var root = document.createElement('div');
+    root.className = 'lb'; root.setAttribute('role', 'dialog'); root.setAttribute('aria-modal', 'true');
+    var arrow = '<svg viewBox="0 0 18 10" aria-hidden="true"><path d="M0 5h16M12 1l4 4-4 4" fill="none" stroke="currentColor" stroke-width="1.3"/></svg>';
+    root.innerHTML = '<div class="lb-bg"></div><div class="lb-stage"><figure class="lb-fig"><div class="lb-no" aria-hidden="true"></div><div class="lb-mat"><div class="lb-view"><img class="a" alt=""><img class="b" alt=""></div></div>' +
+      '<figcaption class="lb-cap"><div class="lb-txt"><h2 class="lb-t"></h2><p class="lb-m"></p></div><div class="lb-act"><div class="lb-seg" role="group"><button type="button" data-v="px"></button><button type="button" data-v="sy"></button></div>' +
+      '<a class="lb-cta hand"></a><a class="lb-more"></a></div></figcaption></figure></div>' +
+      '<button type="button" class="lb-x"></button><button type="button" class="lb-nav lb-prev">' + arrow + '</button><button type="button" class="lb-nav lb-next">' + arrow + '</button>';
+    var $ = function (s) { return root.querySelector(s); };
+    var fig = $('.lb-fig'), vbox = $('.lb-view'), ia = $('img.a'), ib = $('img.b'), tEl = $('.lb-t'), mEl = $('.lb-m'), noEl = $('.lb-no'), cta = $('.lb-cta'), more = $('.lb-more'), xBtn = $('.lb-x');
+    var segs = [].slice.call(root.querySelectorAll('.lb-seg button')), prev = $('.lb-prev'), next = $('.lb-next');
+    var info = null, mode = (card._sym && card._sym()) ? 'sy' : 'px', seq = 0, saved = document.activeElement, pushed = false, closing = false, swiped = false, sx0 = 0, sy0 = 0;
+    segs[0].textContent = T.px || 'Pixels'; segs[1].textContent = T.sy || 'Symbols';
+    xBtn.setAttribute('aria-label', T.close || 'Close'); xBtn.textContent = '×';
+    prev.setAttribute('aria-label', T.prev || 'Previous'); next.setAttribute('aria-label', T.next || 'Next');
+    cta.textContent = T.cta || ''; cta.href = T.ctaHref || '#download';
+    if (document.querySelector('.gal-wrap')) { more.hidden = true; } else { more.textContent = T.more || ''; more.href = T.moreHref || '/gallery/'; }
+
+    function metaText() { return mode === 'sy' ? info.sc + '×' + info.sr + ' ' + (T.glyphs || 'glyphs') : info.lw + '×' + info.lh + ' px'; }
+    function fit() {
+      var vw = window.innerWidth, vh = window.innerHeight, small = vw < 700;
+      var maxW = Math.min(vw - (small ? 40 : 170), 1180), maxH = vh - (small ? 262 : 215);
+      var lw = info.lw, lh = info.lh, s = Math.floor(Math.min(maxW / lw, maxH / lh)), w, h;
+      if (s >= 1) { w = lw * s; h = lh * s; } else { w = Math.max(90, Math.min(maxW, maxH * lw / lh)); h = w * lh / lw; }
+      vbox.style.width = Math.round(w) + 'px'; vbox.style.height = Math.round(h) + 'px';
+    }
+    function setView(v, cx, cy, instant) {
+      if (v === mode && !instant) { return; }
+      mode = v;
+      segs.forEach(function (b) { b.setAttribute('aria-pressed', b.getAttribute('data-v') === v ? 'true' : 'false'); });
+      mEl.textContent = metaText();
+      var top = v === 'sy' ? ib : ia, under = v === 'sy' ? ia : ib;
+      under.style.visibility = 'visible'; under.style.zIndex = '1'; top.style.visibility = 'visible'; top.style.zIndex = '2';
+      if (instant || RM) { top.style.clipPath = 'none'; under.style.visibility = 'hidden'; return; }
+      var r = vbox.getBoundingClientRect(), px = cx - r.left, py = cy - r.top, R = Math.hypot(Math.max(px, r.width - px), Math.max(py, r.height - py)) * 1.15, my = ++seq;
+      spread(top, px, py, R, 0, 1, 720, 2.1 + seq, function () { if (my === seq) { under.style.visibility = 'hidden'; } });
+    }
+    function render(i, first) {
+      cur = i; var c = list[i]; info = infoOf(c);
+      ia.src = info.a; ib.src = info.b; ia.alt = info.altA; ib.alt = info.altB;
+      tEl.textContent = info.title; root.setAttribute('aria-label', info.title);
+      noEl.textContent = pad3(i + 1) + ' / ' + pad3(list.length);
+      fit(); setView(mode, 0, 0, true);
+      if (!first) { fig.classList.remove('on'); void fig.offsetWidth; fig.classList.add('on'); }
+      [1, -1].forEach(function (d) { var n = list[(i + d + list.length) % list.length], inf = infoOf(n), im = new Image(); im.src = inf.a; var im2 = new Image(); im2.src = inf.b; });
+    }
+    function go(d) { render((cur + d + list.length) % list.length, false); }
+
+    var R0 = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y)) * 1.15, sbw = window.innerWidth - document.documentElement.clientWidth;
+    var inerts = [].slice.call(document.querySelectorAll('header.top, main, footer'));
+    function onKey(e) {
+      if (e.key === 'Escape') { e.preventDefault(); close(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
+      else if (e.key === 'Tab') {
+        var f = [].slice.call(root.querySelectorAll('button, a[href]')).filter(function (n) { return !n.hidden && n.offsetParent !== null; });
+        if (!f.length) { return; }
+        var a = document.activeElement, i = f.indexOf(a);
+        if (e.shiftKey && (i <= 0)) { e.preventDefault(); f[f.length - 1].focus(); } else if (!e.shiftKey && (i === f.length - 1 || i < 0)) { e.preventDefault(); f[0].focus(); }
+      }
+    }
+    function onResize() { fit(); }
+    function onPop() { if (pushed) { pushed = false; finish(); } }
+    function finish() {
+      if (closing) { return; }
+      closing = true;
+      document.removeEventListener('keydown', onKey, true); window.removeEventListener('resize', onResize); window.removeEventListener('popstate', onPop);
+      fig.classList.remove('on');
+      spread(root, x, y, R0, 1, 0, 420, 1.3, function () {
+        if (root.parentNode) { root.parentNode.removeChild(root); }
+        inerts.forEach(function (n) { n.inert = false; });
+        document.documentElement.style.overflow = ''; document.body.style.paddingRight = '';
+        LB = null;
+        try { if (saved && saved.focus) { saved.focus({ preventScroll: true }); } } catch (e) { /* ignore */ }
+      });
+    }
+    function close() { if (pushed) { pushed = false; try { history.back(); } catch (e) { /* ignore */ } } finish(); }
+
+    xBtn.addEventListener('click', close);
+    prev.addEventListener('click', function () { go(-1); }); next.addEventListener('click', function () { go(1); });
+    root.addEventListener('click', function (e) { if (e.target === root || e.target.classList.contains('lb-bg') || e.target.classList.contains('lb-stage')) { close(); } });
+    segs.forEach(function (b) { b.addEventListener('click', function (e) { var r = b.getBoundingClientRect(); setView(b.getAttribute('data-v'), r.left + r.width / 2, r.top + r.height / 2); e.stopPropagation(); }); });
+    vbox.addEventListener('pointerdown', function (e) { sx0 = e.clientX; sy0 = e.clientY; swiped = false; });
+    vbox.addEventListener('pointerup', function (e) {
+      var dx = e.clientX - sx0, dy = e.clientY - sy0;
+      if (e.pointerType !== 'mouse' && Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.3) { swiped = true; go(dx < 0 ? 1 : -1); }
+    });
+    vbox.addEventListener('click', function (e) { if (swiped) { swiped = false; return; } setView(mode === 'sy' ? 'px' : 'sy', e.clientX, e.clientY); });
+
+    LB = root;
+    root.style.clipPath = blob(x, y, 0.5, 1.3);
+    document.body.appendChild(root);
+    inerts.forEach(function (n) { n.inert = true; });
+    document.documentElement.style.overflow = 'hidden'; if (sbw > 0) { document.body.style.paddingRight = sbw + 'px'; }
+    render(cur, true);
+    document.addEventListener('keydown', onKey, true); window.addEventListener('resize', onResize); window.addEventListener('popstate', onPop);
+    try { history.pushState({ ikLb: 1 }, ''); pushed = true; } catch (e) { /* ignore */ }
+    spread(root, x, y, R0, 0, 1, 680, 1.3, null);
+    setTimeout(function () { fig.classList.add('on'); }, RM ? 0 : 260);
+    try { xBtn.focus({ preventScroll: true }); } catch (e) { /* ignore */ }
   }
 
   function start() {
