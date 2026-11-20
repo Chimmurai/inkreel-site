@@ -875,6 +875,8 @@ body { position: relative; }
 .gcta.show { opacity: 1; filter: none; transform: translate(-50%, 0); }
 .gcta .go { position: relative; z-index: 1; color: var(--ink); text-decoration: none; white-space: nowrap; font-size: 1.12em; }
 .gcta .x { position: relative; z-index: 1; background: none; border: 0; color: var(--ink); font: 500 1rem/1 var(--mono); padding: 0.4rem 0.6rem; cursor: pointer; opacity: 0.6; }
+.glic { max-width: 46rem; margin: 0 0 1.8rem; color: var(--dim); font-size: 0.95rem; scroll-margin-top: calc(var(--hdr) + 1rem); }
+.glic a { color: var(--ink); }
 .gnote { max-width: 46rem; margin: 3rem 0 1.6rem; color: var(--dim); font-size: 0.95rem; }
 .gal-wrap > .actions { margin-top: 0.6rem; }
 .gmore { margin: 0.4rem 0 0; }
