@@ -149,7 +149,9 @@
       if (RM || !svg) { return; }
       var p = pos(e), c = document.createElementNS(NS, 'circle');
       c.setAttribute('class', 'rip'); c.setAttribute('cx', p[0].toFixed(1)); c.setAttribute('cy', p[1].toFixed(1)); c.setAttribute('r', '26');
-      svg.style.display = ''; svg.appendChild(c); setTimeout(function () { if (c.parentNode) { c.parentNode.removeChild(c); } }, 800);
+      if (!active) { path.setAttribute('d', ''); drops.forEach(function (dd) { dd.setAttribute('r', '0'); }); }   // шторки нема: старий контур і краплі не показувати, лише коло
+      svg.style.display = ''; svg.appendChild(c);
+      setTimeout(function () { if (c.parentNode) { c.parentNode.removeChild(c); } if (!active && !svg.querySelector('.rip')) { svg.style.display = 'none'; } }, 800);
     }
     /* назва картки: прилипла до кута; тікає від курсора в інші кути, а коли тікати нікуди (кути зайняті лінією) - тьмяніє й телепортується */
     function rect(cn) { return [cn.indexOf('r') >= 0 ? W - cw : 0, cn.indexOf('t') >= 0 ? 0 : H - ch]; }

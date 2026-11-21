@@ -844,7 +844,7 @@ body { position: relative; }
 .gal.tease { column-width: 13rem; }
 @media (min-width: 1260px) { .gal-wrap .gal { max-width: 1180px; column-width: auto; column-count: 3; column-gap: 14px; } .gal-wrap .gcard { margin-bottom: 14px; } }
 .gcard { position: relative; break-inside: avoid; margin: 0 0 1.1rem; }
-.split { --r: 10px; position: relative; aspect-ratio: var(--ar); overflow: hidden; border-radius: var(--r); background: var(--faint); touch-action: pan-y; cursor: zoom-in; user-select: none; -webkit-user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
+.split { --r: 10px; position: relative; aspect-ratio: var(--ar); overflow: hidden; border-radius: var(--r); clip-path: inset(0 round var(--r)); isolation: isolate; background: var(--faint); touch-action: pan-y; cursor: zoom-in; user-select: none; -webkit-user-select: none; outline: none; -webkit-tap-highlight-color: transparent; }
 .js .split:not(.ready) { background: linear-gradient(100deg, color-mix(in srgb, var(--ink) 6%, var(--paper)) 30%, color-mix(in srgb, var(--ink) 15%, var(--paper)) 50%, color-mix(in srgb, var(--ink) 6%, var(--paper)) 70%) 0 0 / 260% 100%; animation: shim 1.5s linear infinite; }
 @keyframes shim { from { background-position: 100% 0; } to { background-position: -60% 0; } }
 .split.err img, .split.err .cap, .split.err .st, .split.err .ink { visibility: hidden; }
@@ -920,16 +920,21 @@ body { position: relative; }
 /* === dithering page === */
 .doc.dither { max-width: 66rem; }
 .doc.dither > p, .doc.dither > ul, .doc.dither > h2, .doc.dither > details, .doc.dither > .big { max-width: 46rem; }
-.dgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.9rem; margin: 2rem 0 1.4rem; padding: 0; list-style: none; }
+.dgrid { display: grid; grid-template-columns: repeat(5, 192px); justify-content: space-between; gap: 1.6rem 0.9rem; margin: 2rem 0 1.4rem; padding: 0; list-style: none; }
 .dgrid figure { margin: 0; }
-.dgrid img { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--faint); filter: url(#ik-theme); }
+.dgrid img { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--faint); filter: url(#ik-theme); image-rendering: pixelated; image-rendering: crisp-edges; }
 .dgrid figcaption { margin-top: 0.55rem; font: 500 0.7rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
 .dgrid figcaption span { display: block; margin-top: 0.25rem; text-transform: none; letter-spacing: 0; font: italic 500 0.98rem/1.2 var(--display); color: var(--dim); }
 .dgrid figure.me figcaption { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
 .doc.dither .classic dt { font: 500 0.8rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1.1rem; }
 .doc.dither .classic dd { margin: 0.2rem 0 0; color: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
 .doc.dither .actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 1.6rem 0 0; }
-@media (max-width: 900px) { .dgrid { grid-template-columns: repeat(2, 1fr); } .dgrid figure:last-child { grid-column: 1 / -1; } }
+/* a 192 px source is shown at 1x (and 2x on very wide screens); a smooth shrink would melt the dither into grey, so the cells keep whole sizes */
+@media (max-width: 1100px) { .dgrid { grid-template-columns: repeat(3, 192px); justify-content: center; gap: 1.6rem 1.2rem; } .dgrid figure.me { grid-column: span 2; } .dgrid figure.me img { width: 384px; max-width: 100%; } }
+@media (max-width: 640px) { .dgrid { grid-template-columns: repeat(2, 192px); } .dgrid figure.me { grid-column: 1 / -1; } .dgrid figure.me img { width: 384px; max-width: 100%; margin: 0 auto; } .dgrid figure.me figcaption { text-align: center; } }
+@media (max-width: 440px) { .dgrid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem 0.8rem; } .dgrid figure.me img { width: 100%; } }
+@media (min-width: 2200px) { .dgrid { grid-template-columns: repeat(5, 384px); width: 2000px; max-width: none; margin-left: calc(50% - 1000px); justify-content: space-between; } }
+@media (min-width: 3200px) { .dgrid { grid-template-columns: repeat(5, 576px); width: 3000px; margin-left: calc(50% - 1500px); } }
 /* === preview note === */
 .pvn { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin: 0 0 1.6rem; padding: 0.95rem 1.15rem; border: 1px solid var(--ink); }
 .pvn-t { flex: 1 1 24rem; margin: 0; font: 500 1.08rem/1.4 var(--display); }
