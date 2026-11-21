@@ -917,3 +917,16 @@ body { position: relative; }
 @media (max-width: 700px) { .lb-nav { top: auto; bottom: 14px; margin: 0; } .lb-prev { left: 14px; } .lb-next { right: 14px; } .lb-stage { padding-bottom: 58px; } .lb-x { top: 10px; right: 10px; } }
 @media (prefers-reduced-motion: reduce) { .lb-fig { transition: none; filter: none; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .js .split:not(.ready) { animation: none; } .gcta { transition: none; } .split .st { transition: none; } .split .ink circle.rip { animation: none; display: none; } }
+/* === dithering page === */
+.doc.dither { max-width: 66rem; }
+.doc.dither > p, .doc.dither > ul, .doc.dither > h2, .doc.dither > details, .doc.dither > .big { max-width: 46rem; }
+.dgrid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 0.9rem; margin: 2rem 0 1.4rem; padding: 0; list-style: none; }
+.dgrid figure { margin: 0; }
+.dgrid img { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--faint); filter: url(#ik-theme); }
+.dgrid figcaption { margin-top: 0.55rem; font: 500 0.7rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.dgrid figcaption span { display: block; margin-top: 0.25rem; text-transform: none; letter-spacing: 0; font: italic 500 0.98rem/1.2 var(--display); color: var(--dim); }
+.dgrid figure.me figcaption { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
+.doc.dither .classic dt { font: 500 0.8rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1.1rem; }
+.doc.dither .classic dd { margin: 0.2rem 0 0; color: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
+.doc.dither .actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 1.6rem 0 0; }
+@media (max-width: 900px) { .dgrid { grid-template-columns: repeat(2, 1fr); } .dgrid figure:last-child { grid-column: 1 / -1; } }
