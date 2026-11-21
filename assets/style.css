@@ -930,3 +930,11 @@ body { position: relative; }
 .doc.dither .classic dd { margin: 0.2rem 0 0; color: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
 .doc.dither .actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 1.6rem 0 0; }
 @media (max-width: 900px) { .dgrid { grid-template-columns: repeat(2, 1fr); } .dgrid figure:last-child { grid-column: 1 / -1; } }
+/* === preview note === */
+.pvn { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin: 0 0 1.6rem; padding: 0.95rem 1.15rem; border: 1px solid var(--ink); }
+.pvn-t { flex: 1 1 24rem; margin: 0; font: 500 1.08rem/1.4 var(--display); }
+.pvn-t b { display: inline-block; margin-right: 0.7rem; padding: 0.28rem 0.5rem; background: var(--ink); color: var(--paper); font: 500 0.66rem/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; vertical-align: 0.15em; }
+.pvn-g { display: flex; align-items: center; gap: 0.5rem; color: var(--ink); text-decoration: none; }
+.pvn-g img { height: 76px; width: auto; display: block; border-radius: 4px; background: var(--faint); filter: url(#ik-theme); }
+.pvn-g span { margin-left: 0.5rem; font: 500 0.66rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; border-bottom: 1px solid currentColor; padding-bottom: 0.2rem; white-space: nowrap; }
+@media (max-width: 700px) { .pv { top: auto; bottom: 22px; right: 38px; } .pvn-g img { height: 56px; } .pvn-g span { flex-basis: 100%; margin: 0.3rem 0 0; } .pvn-g { flex-wrap: wrap; } }
