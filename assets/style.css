@@ -640,8 +640,9 @@ html.seen .tip { display: none; }
 .disc.l3 { background-image: radial-gradient(circle, var(--ink) 1.6px, transparent 2.1px); background-size: 8px 8px; }
 .disc.l4 { background-image: radial-gradient(circle, var(--ink) 1.2px, transparent 1.7px), repeating-linear-gradient(45deg, var(--ink) 0 1px, transparent 1px 5px); background-size: 9px 9px, auto; }
 .disc.l5 { background-image: repeating-radial-gradient(circle at 32% 34%, var(--ink) 0 1px, transparent 1px 5px); }
-.disc.dia { width: 46px; height: 46px; margin-top: 9px; border-radius: 0; border-style: dashed; transform: rotate(45deg); background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px); background-size: 8px 8px; }
+.disc.dia { width: 46px; height: 46px; margin: 0 auto; border-radius: 0; border-style: dashed; transform: translateY(9px) rotate(45deg); background-image: linear-gradient(var(--ink) 1px, transparent 1px), linear-gradient(90deg, var(--ink) 1px, transparent 1px); background-size: 8px 8px; }
 .ladder .lbl { display: block; margin-top: 1rem; font: 500 0.78rem/1.2 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.ladder li.br .lbl { margin-top: calc(1rem + 18px); }   /* ромб нижчий за круг на 18 px: підписи стоять на одній лінії з рештою */
 .ladder .sub { display: block; margin-top: 0.2rem; font-size: 0.86rem; color: var(--dim); }
 .notes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem; margin-top: 3.4rem; }
 .notes div { border-top: 1px solid var(--line); padding-top: 1rem; }
@@ -864,8 +865,11 @@ body { position: relative; }
 .gcard.promo h3 { margin: 0; font-size: clamp(1.5rem, 2.2vw, 1.9rem); line-height: 1.1; color: var(--ink); }
 .gcard.promo p { margin: 0; color: color-mix(in srgb, var(--ink) 82%, var(--paper)); font-size: 0.95rem; }
 .gcard.promo .btn { max-width: 100%; }
-.split .cap { position: absolute; left: 0; bottom: 0; max-width: 90%; padding: 0.5rem 0.85rem 0.45rem; background: var(--paper); color: var(--ink); font: italic 500 1.12rem/1.05 var(--display); letter-spacing: 0.01em; border-radius: 0 var(--r) 0 var(--r); pointer-events: none; transition: transform 0.6s cubic-bezier(.2,.85,.2,1), opacity 0.25s; }
-.split .cap[data-c="br"], .split .cap[data-c="tl"] { border-radius: var(--r) 0 var(--r) 0; }
+.split .cap { position: absolute; left: 0; bottom: 0; max-width: 90%; padding: 0.5rem 0.85rem 0.45rem; background: var(--paper); color: var(--ink); font: italic 500 1.12rem/1.05 var(--display); letter-spacing: 0.01em; border-radius: 0 var(--r) 0 0; pointer-events: none; transition: transform 0.6s cubic-bezier(.2,.85,.2,1), opacity 0.25s; }
+/* кут, яким назва торкається краю картки, лишається прямим: його округлює сама картка (overflow), а власне округлення давало тонкий серпик картинки в куті; заокруглений лише внутрішній кут */
+.split .cap[data-c="br"] { border-radius: var(--r) 0 0 0; }
+.split .cap[data-c="tl"] { border-radius: 0 0 var(--r) 0; }
+.split .cap[data-c="tr"] { border-radius: 0 0 0 var(--r); }
 .split .cap.vanish { opacity: 0; transition: opacity 0.2s; }
 .gcard.promo::after, .gcta::before { content: ""; position: absolute; inset: 0; background: #fff; mix-blend-mode: difference; clip-path: circle(0 at var(--mx, 50%) var(--my, 50%)); transition: clip-path 0.75s cubic-bezier(.2,.7,.2,1); pointer-events: none; border-radius: inherit; z-index: 3; }
 .gcard.promo:hover::after, .gcard.promo:focus-within::after, .gcta:hover::before, .gcta:focus-within::before { clip-path: circle(170% at var(--mx, 50%) var(--my, 50%)); }
