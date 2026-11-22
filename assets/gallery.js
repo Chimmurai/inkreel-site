@@ -58,9 +58,9 @@
       var pad = (MX + 4) * S; Fmin = -half - pad; Fmax = half + pad;
     }
     function size() {
-      W = Math.max(1, el.clientWidth); H = Math.max(1, el.clientHeight);
+      var br = el.getBoundingClientRect(); W = Math.max(1, br.width); H = Math.max(1, br.height);
       if (svg) { svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); }
-      if (cap) { cw = cap.offsetWidth; ch = cap.offsetHeight; place(corner, true); }
+      if (cap) { var cr = cap.getBoundingClientRect(); cw = cr.width; ch = cr.height; place(corner, true); }
       axis();
     }
     function begin(x, y, to) {

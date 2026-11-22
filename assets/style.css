@@ -865,7 +865,7 @@ body { position: relative; }
 .gcard.promo h3 { margin: 0; font-size: clamp(1.5rem, 2.2vw, 1.9rem); line-height: 1.1; color: var(--ink); }
 .gcard.promo p { margin: 0; color: color-mix(in srgb, var(--ink) 82%, var(--paper)); font-size: 0.95rem; }
 .gcard.promo .btn { max-width: 100%; }
-.split .cap { position: absolute; left: 0; bottom: 0; max-width: 90%; padding: 0.5rem 0.85rem 0.45rem; background: var(--paper); color: var(--ink); font: italic 500 1.12rem/1.05 var(--display); letter-spacing: 0.01em; border-radius: 0 var(--r) 0 0; pointer-events: none; transition: transform 0.6s cubic-bezier(.2,.85,.2,1), opacity 0.25s; }
+.split .cap { position: absolute; left: 0; bottom: 0; max-width: 90%; padding: 0.5rem 0.85rem 0.45rem; background: var(--paper); color: var(--ink); box-shadow: 0 0 0 1px var(--paper); font: italic 500 1.12rem/1.05 var(--display); letter-spacing: 0.01em; border-radius: 0 var(--r) 0 0; pointer-events: none; transition: transform 0.6s cubic-bezier(.2,.85,.2,1), opacity 0.25s; }
 /* кут, яким назва торкається краю картки, лишається прямим: його округлює сама картка (overflow), а власне округлення давало тонкий серпик картинки в куті; заокруглений лише внутрішній кут */
 .split .cap[data-c="br"] { border-radius: var(--r) 0 0 0; }
 .split .cap[data-c="tl"] { border-radius: 0 0 var(--r) 0; }
@@ -920,21 +920,20 @@ body { position: relative; }
 /* === dithering page === */
 .doc.dither { max-width: 66rem; }
 .doc.dither > p, .doc.dither > ul, .doc.dither > h2, .doc.dither > details, .doc.dither > .big { max-width: 46rem; }
-.dgrid { display: grid; grid-template-columns: repeat(5, 192px); justify-content: space-between; gap: 1.6rem 0.9rem; margin: 2rem 0 1.4rem; padding: 0; list-style: none; }
-.dgrid figure { margin: 0; }
-.dgrid img { width: 100%; height: auto; display: block; border-radius: 6px; background: var(--faint); filter: url(#ik-theme); image-rendering: pixelated; image-rendering: crisp-edges; }
-.dgrid figcaption { margin-top: 0.55rem; font: 500 0.7rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
-.dgrid figcaption span { display: block; margin-top: 0.25rem; text-transform: none; letter-spacing: 0; font: italic 500 0.98rem/1.2 var(--display); color: var(--dim); }
-.dgrid figure.me figcaption { text-decoration: underline; text-underline-offset: 0.3em; text-decoration-thickness: 1px; }
 .doc.dither .classic dt { font: 500 0.8rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 1.1rem; }
 .doc.dither .classic dd { margin: 0.2rem 0 0; color: color-mix(in srgb, var(--ink) 86%, var(--paper)); }
 .doc.dither .actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin: 1.6rem 0 0; }
-/* a 192 px source is shown at 1x (and 2x on very wide screens); a smooth shrink would melt the dither into grey, so the cells keep whole sizes */
-@media (max-width: 1100px) { .dgrid { grid-template-columns: repeat(3, 192px); justify-content: center; gap: 1.6rem 1.2rem; } .dgrid figure.me { grid-column: span 2; } .dgrid figure.me img { width: 384px; max-width: 100%; } }
-@media (max-width: 640px) { .dgrid { grid-template-columns: repeat(2, 192px); } .dgrid figure.me { grid-column: 1 / -1; } .dgrid figure.me img { width: 384px; max-width: 100%; margin: 0 auto; } .dgrid figure.me figcaption { text-align: center; } }
-@media (max-width: 440px) { .dgrid { grid-template-columns: repeat(2, 1fr); gap: 1.2rem 0.8rem; } .dgrid figure.me img { width: 100%; } }
-@media (min-width: 2200px) { .dgrid { grid-template-columns: repeat(5, 384px); width: 2000px; max-width: none; margin-left: calc(50% - 1000px); justify-content: space-between; } }
-@media (min-width: 3200px) { .dgrid { grid-template-columns: repeat(5, 576px); width: 3000px; margin-left: calc(50% - 1500px); } }
+.dgrid { display: grid; gap: 2.2rem; margin: 2rem 0 1.4rem; padding: 0; }
+.dgrid figure { margin: 0; display: grid; grid-template-columns: var(--dw) minmax(0, 1fr); align-items: center; gap: 0.8rem 2rem; --dw: 384px; }
+/* the source is 192 px (shown 4x on a 768 px file): whole multiples of it stay crisp, a smooth shrink melts the dither into grey */
+.dgrid img { width: var(--dw); height: auto; display: block; border-radius: 6px; background: var(--faint); filter: url(#ik-theme); image-rendering: pixelated; image-rendering: crisp-edges; }
+.dgrid figcaption { font: 500 0.78rem/1.3 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; }
+.dgrid figcaption span { display: block; margin-top: 0.5rem; text-transform: none; letter-spacing: 0; font: italic 500 clamp(1.2rem, 1.6vw, 1.5rem)/1.25 var(--display); color: var(--dim); }
+.dgrid figure.me figcaption { text-decoration: underline; text-underline-offset: 0.35em; text-decoration-thickness: 1px; }
+@media (min-width: 2000px) { .dgrid figure { --dw: 576px; } }
+@media (min-width: 3000px) { .dgrid figure { --dw: 768px; } }
+@media (max-width: 640px) { .dgrid figure { --dw: 192px; gap: 0.6rem 1rem; } .dgrid figcaption span { font-size: 1.05rem; } }
+@media (max-width: 440px) { .dgrid figure { --dw: 40vw; } }
 /* === preview note === */
 .pvn { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.6rem; margin: 0 0 1.6rem; padding: 0.95rem 1.15rem; border: 1px solid var(--ink); }
 .pvn-t { flex: 1 1 24rem; margin: 0; font: 500 1.08rem/1.4 var(--display); }
